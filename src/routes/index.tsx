@@ -34,6 +34,7 @@ const steps = [
     title: "Recolectar",
     icon: Waves,
     text: "Samay Care utiliza información disponible del entorno hospitalario, como demanda de atención, turnos, carga de trabajo, ausencias e incidencias.",
+    image: recolectarIllustration.url,
   },
   {
     n: "02",
