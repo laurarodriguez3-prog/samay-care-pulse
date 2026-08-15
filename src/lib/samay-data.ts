@@ -14,9 +14,11 @@ export type Service = {
 
 export const HOSPITAL = {
   name: "Instituto Nacional de Salud del Niño San Borja",
-  lat: -12.0899,
-  lng: -76.9906,
+  address: "Av. Javier Prado Este 3101, Lima 15037, Perú",
+  lat: -12.0854256,
+  lng: -76.9920275,
 };
+
 
 export const services: Service[] = [
   {
