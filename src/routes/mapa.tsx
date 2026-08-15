@@ -49,7 +49,7 @@ function MapaPage() {
             <h2 className="mb-3 font-display text-lg font-semibold text-deep">
               Servicios · bienestar SANARTE
             </h2>
-            <SanartePanel selected={selected} onSelect={setSelected} />
+            <SanartePanel selected={selected} />
           </div>
         </div>
       </section>
