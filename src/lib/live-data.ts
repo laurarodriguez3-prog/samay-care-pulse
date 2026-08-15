@@ -4,6 +4,7 @@ import {
   irsoVariables,
   reportTrend,
   services,
+  wellnessWorkshops,
   type Service,
 } from "@/lib/samay-data";
 import { useSimulation } from "@/lib/simulation";
