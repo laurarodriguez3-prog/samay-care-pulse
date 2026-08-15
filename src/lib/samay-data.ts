@@ -35,7 +35,7 @@ export const services: Service[] = [
       "Baja recuperación",
       "Incremento de incidencias",
     ],
-    position: { lat: -12.0893, lng: -76.9913 },
+    position: { lat: -12.0848, lng: -76.9927 },
   },
   {
     id: "hospitalizacion",
@@ -46,7 +46,7 @@ export const services: Service[] = [
     trend: 5,
     criticalHours: "14:00 — 18:00",
     factors: ["Ocupación sostenida de camas", "Rotación de personal", "Carga administrativa"],
-    position: { lat: -12.0904, lng: -76.99 },
+    position: { lat: -12.0859, lng: -76.9914 },
   },
   {
     id: "consultorios",
@@ -57,7 +57,7 @@ export const services: Service[] = [
     trend: -4,
     criticalHours: "09:00 — 11:00",
     factors: ["Demanda estable", "Distribución equilibrada de tareas"],
-    position: { lat: -12.0891, lng: -76.9897 },
+    position: { lat: -12.0846, lng: -76.9911 },
   },
   {
     id: "uci",
@@ -68,7 +68,7 @@ export const services: Service[] = [
     trend: 8,
     criticalHours: "22:00 — 02:00",
     factors: ["Turnos nocturnos prolongados", "Alta complejidad", "Baja recuperación"],
-    position: { lat: -12.0907, lng: -76.9912 },
+    position: { lat: -12.0862, lng: -76.9926 },
   },
 ];
 
