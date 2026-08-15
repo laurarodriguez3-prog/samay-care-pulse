@@ -30,8 +30,6 @@ export const Route = createFileRoute("/linea-de-tiempo")({
   component: TimelinePage,
 });
 
-const filters = [7, 30, 90] as const;
-
 const topicOrder: TopicKey[] = [
   "bienestar",
   "pausas",
@@ -45,9 +43,12 @@ const timeFmt = (at: number) =>
   new Date(at).toLocaleTimeString("es-PE", { hour: "2-digit", minute: "2-digit" });
 
 function TimelinePage() {
-  const [range, setRange] = useState<(typeof filters)[number]>(7);
-  const events = timeline.filter((e) => e.range <= range);
   const sim = useSimulation();
+  const ranking = roleOrder
+    .map((key) => ({ key, value: sim.roleCounts[key] ?? 0 }))
+    .sort((a, b) => b.value - a.value);
+  const maxRole = Math.max(0, ...ranking.map((r) => r.value));
+
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6">
