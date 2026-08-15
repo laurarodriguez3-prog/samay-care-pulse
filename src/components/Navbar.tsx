@@ -12,6 +12,9 @@ const links = [
 
 export function Navbar() {
   const [open, setOpen] = useState(false);
+  const sim = useSimulation();
+  const toggleSim = () => (sim.active ? stopSimulation() : startSimulation());
+  const simLabel = sim.active ? "Reiniciar simulación" : "Iniciar simulación";
 
   return (
     <header className="sticky top-0 z-50 border-b border-border/70 bg-background/85 backdrop-blur-md">
