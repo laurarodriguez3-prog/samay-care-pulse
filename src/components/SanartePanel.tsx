@@ -171,9 +171,17 @@ export function SanartePanel({
         </div>
       )}
 
-      {shown.map((w) => (
-        <WorkshopCard key={w.id} w={w} />
-      ))}
+      {filter === "todas" ? (
+        <div className="surface-card p-4 text-center">
+          <p className="text-sm font-medium text-deep">Selecciona una actividad</p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Elige Yoga, Tejido, Impro, Escritura o Coro en el desplegable para ver sus métricas
+            detalladas.
+          </p>
+        </div>
+      ) : (
+        shown.map((w) => <WorkshopCard key={w.id} w={w} />)
+      )}
 
       {!active && (
         <p className="text-xs text-muted-foreground">
