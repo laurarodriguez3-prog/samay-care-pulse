@@ -217,13 +217,58 @@ export function Chatbot() {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, open]);
 
-  const send = (text: string, via: "texto" | "voz" = "texto") => {
-    if (!text.trim()) return;
-    const bot = answer(text);
-    setMessages((m) => [...m, { role: "user", text }, bot]);
-    recordQuery(classify(text), text.trim(), via);
+  const ask = useServerFn(askAssistant);
+
+  const send = (text: string, via: "texto" | "voz" = "texto", local = false) => {
+    const value = text.trim();
+    if (!value) return;
+    const fallback = answer(value);
+    recordQuery(classify(value), value, via);
     setInput("");
+
+    if (local) {
+      setMessages((m) => [...m, { role: "user", text: value }, fallback]);
+      return;
+    }
+
+    setMessages((m) => [
+      ...m,
+      { role: "user", text: value },
+      { role: "bot", text: "Escribiendo…", pending: true },
+    ]);
+
+    const history = [
+      ...messages
+        .filter((m) => !m.pending)
+        .slice(-8)
+        .map((m) => ({
+          role: (m.role === "user" ? "user" : "assistant") as "user" | "assistant",
+          content: m.text,
+        })),
+      { role: "user" as const, content: value },
+    ];
+
+    ask({ data: { messages: history } })
+      .then((res) => {
+        setMessages((m) => {
+          const next = [...m];
+          next[next.length - 1] = {
+            role: "bot",
+            text: res.text?.trim() || fallback.text,
+            cards: fallback.cards,
+          };
+          return next;
+        });
+      })
+      .catch(() => {
+        setMessages((m) => {
+          const next = [...m];
+          next[next.length - 1] = fallback;
+          return next;
+        });
+      });
   };
+
 
   const clearTimers = () => {
     if (timerRef.current) clearTimeout(timerRef.current);
