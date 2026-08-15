@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
 import logo from "@/assets/samay-care-logo.png.asset.json";
+import { startSimulation, stopSimulation, useSimulation } from "@/lib/simulation";
 
 const links = [
   { to: "/mapa", label: "Mapa de Calor" },
@@ -11,6 +12,9 @@ const links = [
 
 export function Navbar() {
   const [open, setOpen] = useState(false);
+  const sim = useSimulation();
+  const toggleSim = () => (sim.active ? stopSimulation() : startSimulation());
+  const simLabel = sim.active ? "Reiniciar simulación" : "Iniciar simulación";
 
   return (
     <header className="sticky top-0 z-50 border-b border-border/70 bg-background/85 backdrop-blur-md">
@@ -40,8 +44,11 @@ export function Navbar() {
         </div>
 
         <div className="flex items-center gap-2">
-          <button className="hidden rounded-full cta-gradient px-5 py-2 text-sm font-semibold shadow-[var(--shadow-card)] transition-opacity hover:opacity-90 md:inline-flex">
-            Ingresar
+          <button
+            onClick={toggleSim}
+            className="hidden rounded-full cta-gradient px-5 py-2 text-sm font-semibold shadow-[var(--shadow-card)] transition-opacity hover:opacity-90 md:inline-flex"
+          >
+            {simLabel}
           </button>
           <button
             aria-label="Abrir menú"
@@ -67,8 +74,14 @@ export function Navbar() {
                 {l.label}
               </Link>
             ))}
-            <button className="mt-2 rounded-full cta-gradient px-5 py-3 text-sm font-semibold">
-              Ingresar
+            <button
+              onClick={() => {
+                toggleSim();
+                setOpen(false);
+              }}
+              className="mt-2 rounded-full cta-gradient px-5 py-3 text-sm font-semibold"
+            >
+              {simLabel}
             </button>
           </div>
         </div>
