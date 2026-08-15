@@ -142,6 +142,13 @@ function Index() {
                 </span>
                 <span className="font-display text-2xl font-semibold text-sky">{s.n}</span>
               </div>
+              {s.image && (
+                <img
+                  src={s.image}
+                  alt={`Ilustración del paso ${s.title}`}
+                  className="mt-4 h-40 w-full rounded-xl object-contain"
+                />
+              )}
               <h3 className="mt-4 font-display text-lg font-semibold text-deep">{s.title}</h3>
               <p className="mt-2 text-sm text-muted-foreground">{s.text}</p>
             </article>
