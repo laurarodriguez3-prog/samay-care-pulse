@@ -1,4 +1,5 @@
-import { riskColor, riskDot, riskLabel, services, type Service } from "@/lib/samay-data";
+import { riskColor, riskDot, riskLabel, type Service } from "@/lib/samay-data";
+import { useLiveData } from "@/lib/live-data";
 
 export function ServiceCards({
   selected,
@@ -7,6 +8,7 @@ export function ServiceCards({
   selected: Service;
   onSelect: (s: Service) => void;
 }) {
+  const { services } = useLiveData();
   return (
     <div className="flex flex-col gap-3">
       {services.map((s) => {
