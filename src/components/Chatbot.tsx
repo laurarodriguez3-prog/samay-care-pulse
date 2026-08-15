@@ -1,9 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { MessageCircle, Mic, Send, Square, X } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
 import { HOSPITAL, wellnessActivities } from "@/lib/samay-data";
+import { askAssistant } from "@/lib/chat.functions";
 import { recordQuery, type TopicKey } from "@/lib/simulation";
 
-type Msg = { role: "bot" | "user"; text: string; cards?: boolean };
+type Msg = { role: "bot" | "user"; text: string; cards?: boolean; pending?: boolean };
+
 
 const norm = (t: string) =>
   t.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -85,7 +88,13 @@ function classify(raw: string): TopicKey {
   if (t.includes("apoyo") || t.includes("recurso") || t.includes("ocupacional")) return "apoyo";
   if (t.includes("bienestar")) return "bienestar";
   if (
+    t.includes("indicador") ||
+    t.includes("indice") ||
+    t.includes("índice") ||
+    t.includes("variable") ||
+    t.includes("metrica") ||
     t.includes("plataforma") ||
+
     t.includes("como funciona") ||
     t.includes("cómo funciona") ||
     t.includes("para que sirve") ||
