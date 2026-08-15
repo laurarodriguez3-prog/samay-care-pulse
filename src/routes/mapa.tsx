@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { HospitalMap } from "@/components/HospitalMap";
-import { ServiceCards } from "@/components/ServiceCards";
+import { SanartePanel } from "@/components/SanartePanel";
 import { IrsoGauge } from "@/components/IrsoGauge";
 import { services } from "@/lib/samay-data";
 import { useLiveData } from "@/lib/live-data";
