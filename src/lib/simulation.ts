@@ -20,12 +20,56 @@ export const topicIcons: Record<TopicKey, string> = {
   plataforma: "🧭",
 };
 
+export type RoleKey =
+  | "medicos"
+  | "enfermeras"
+  | "tecnicos"
+  | "tecnologos"
+  | "nutricionistas"
+  | "biologos"
+  | "psicologos"
+  | "trabajadores";
+
+export const roleLabels: Record<RoleKey, string> = {
+  medicos: "Médicos especialistas y subespecialistas",
+  enfermeras: "Enfermeras/os",
+  tecnicos: "Técnicos/as en enfermería",
+  tecnologos: "Tecnólogos médicos",
+  nutricionistas: "Nutricionistas",
+  biologos: "Biólogos",
+  psicologos: "Psicólogos",
+  trabajadores: "Trabajadores sociales",
+};
+
+export const roleIcons: Record<RoleKey, string> = {
+  medicos: "🩺",
+  enfermeras: "💉",
+  tecnicos: "🧑‍⚕️",
+  tecnologos: "🔬",
+  nutricionistas: "🥗",
+  biologos: "🧫",
+  psicologos: "🧠",
+  trabajadores: "🤝",
+};
+
+export const roleOrder: RoleKey[] = [
+  "medicos",
+  "enfermeras",
+  "tecnicos",
+  "tecnologos",
+  "nutricionistas",
+  "biologos",
+  "psicologos",
+  "trabajadores",
+];
+
 export type SimEvent = {
   id: string;
   at: number;
   topic: TopicKey;
   query: string;
   via: "texto" | "voz";
+  role?: RoleKey | null;
 };
 
 export type SimState = {
@@ -33,6 +77,7 @@ export type SimState = {
   startedAt: number | null;
   chatbotUses: number;
   counts: Record<TopicKey, number>;
+  roleCounts: Record<RoleKey, number>;
   events: SimEvent[];
 };
 
@@ -47,13 +92,21 @@ const emptyCounts = (): Record<TopicKey, number> => ({
   plataforma: 0,
 });
 
+const emptyRoleCounts = (): Record<RoleKey, number> =>
+  roleOrder.reduce(
+    (acc, k) => ({ ...acc, [k]: 0 }),
+    {} as Record<RoleKey, number>,
+  );
+
 export const initialState = (): SimState => ({
   active: false,
   startedAt: null,
   chatbotUses: 0,
   counts: emptyCounts(),
+  roleCounts: emptyRoleCounts(),
   events: [],
 });
+
 
 let state: SimState = initialState();
 let hydrated = false;
@@ -74,7 +127,12 @@ function hydrate() {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw) as SimState;
-      state = { ...initialState(), ...parsed, counts: { ...emptyCounts(), ...parsed.counts } };
+      state = {
+        ...initialState(),
+        ...parsed,
+        counts: { ...emptyCounts(), ...parsed.counts },
+        roleCounts: { ...emptyRoleCounts(), ...parsed.roleCounts },
+      };
     }
   } catch {
     /* ignore */
@@ -103,11 +161,19 @@ export function stopSimulation() {
   emit();
 }
 
-export function recordQuery(topic: TopicKey, query: string, via: "texto" | "voz") {
+export function recordQuery(
+  topic: TopicKey,
+  query: string,
+  via: "texto" | "voz",
+  role?: RoleKey | null,
+) {
   state = {
     ...state,
     chatbotUses: state.chatbotUses + 1,
     counts: { ...state.counts, [topic]: state.counts[topic] + 1 },
+    roleCounts: role
+      ? { ...state.roleCounts, [role]: (state.roleCounts[role] ?? 0) + 1 }
+      : state.roleCounts,
     events: [
       {
         id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
@@ -115,12 +181,14 @@ export function recordQuery(topic: TopicKey, query: string, via: "texto" | "voz"
         topic,
         query,
         via,
+        role: role ?? null,
       },
       ...state.events,
     ].slice(0, 60),
   };
   emit();
 }
+
 
 export function useSimulation(): SimState {
   return useSyncExternalStore(

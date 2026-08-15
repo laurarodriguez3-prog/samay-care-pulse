@@ -1,13 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
-import { riskColor, timeline } from "@/lib/samay-data";
 import {
+  roleIcons,
+  roleLabels,
+  roleOrder,
   startSimulation,
   topicIcons,
   topicLabels,
   useSimulation,
   type TopicKey,
 } from "@/lib/simulation";
+
 
 export const Route = createFileRoute("/linea-de-tiempo")({
   head: () => ({
@@ -28,8 +30,6 @@ export const Route = createFileRoute("/linea-de-tiempo")({
   component: TimelinePage,
 });
 
-const filters = [7, 30, 90] as const;
-
 const topicOrder: TopicKey[] = [
   "bienestar",
   "pausas",
@@ -43,9 +43,12 @@ const timeFmt = (at: number) =>
   new Date(at).toLocaleTimeString("es-PE", { hour: "2-digit", minute: "2-digit" });
 
 function TimelinePage() {
-  const [range, setRange] = useState<(typeof filters)[number]>(7);
-  const events = timeline.filter((e) => e.range <= range);
   const sim = useSimulation();
+  const ranking = roleOrder
+    .map((key) => ({ key, value: sim.roleCounts[key] ?? 0 }))
+    .sort((a, b) => b.value - a.value);
+  const maxRole = Math.max(0, ...ranking.map((r) => r.value));
+
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6">
@@ -117,48 +120,45 @@ function TimelinePage() {
       </section>
 
 
-      <div className="mt-6 inline-flex rounded-full border border-border bg-card p-1">
-        {filters.map((f) => (
-          <button
-            key={f}
-            onClick={() => setRange(f)}
-            className={`rounded-full px-4 py-1.5 text-xs font-medium transition-colors ${
-              range === f ? "cta-gradient" : "text-muted-foreground hover:text-deep"
-            }`}
-          >
-            Últimos {f} días
-          </button>
-        ))}
-      </div>
+      <section className="surface-card mt-8 p-5">
+        <h2 className="font-display text-lg font-semibold text-deep">
+          Cargos que más respondieron
+        </h2>
+        <p className="text-xs text-muted-foreground">
+          Ranking de consultas al asistente según el cargo declarado en el chatbot.
+        </p>
 
-      <ol className="relative mt-10 border-l border-border pl-8">
-        {events.map((e) => (
-          <li key={e.date + e.title} className="relative pb-8 last:pb-0">
-            <span
-              className="absolute -left-[41px] top-1.5 h-4 w-4 rounded-full border-2 border-background"
-              style={{ background: riskColor[e.level] }}
-            />
-            <div className="surface-card p-5">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-                  {e.date}
-                </p>
-                <span
-                  className="rounded-full px-2.5 py-1 text-[11px] font-semibold"
-                  style={{
-                    color: riskColor[e.level],
-                    background: `color-mix(in oklab, ${riskColor[e.level]} 14%, transparent)`,
-                  }}
-                >
-                  IRSO {e.irso}
+        <ul className="mt-4 space-y-3">
+          {ranking.map((r, i) => (
+            <li key={r.key} className="flex items-center gap-3">
+              <span className="w-5 shrink-0 text-xs font-semibold text-muted-foreground">
+                {i + 1}
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="flex items-center justify-between gap-2 text-sm text-deep">
+                  <span className="truncate">
+                    {roleIcons[r.key]} {roleLabels[r.key]}
+                  </span>
+                  <span className="shrink-0 font-display font-semibold">{r.value}</span>
                 </span>
-              </div>
-              <p className="mt-2 font-display text-base font-semibold text-deep">{e.title}</p>
-              <p className="mt-1 text-sm text-muted-foreground">{e.detail}</p>
-            </div>
-          </li>
-        ))}
-      </ol>
+                <span className="mt-1 block h-2 w-full overflow-hidden rounded-full bg-secondary">
+                  <span
+                    className="block h-full rounded-full bg-primary transition-all"
+                    style={{ width: `${maxRole ? (r.value / maxRole) * 100 : 0}%` }}
+                  />
+                </span>
+              </span>
+            </li>
+          ))}
+        </ul>
+
+        {maxRole === 0 && (
+          <p className="mt-4 text-xs text-muted-foreground">
+            Aún no hay respuestas registradas: inicia la simulación y consulta al chatbot.
+          </p>
+        )}
+      </section>
+
 
       <p className="mt-8 text-xs text-muted-foreground">
         Datos demostrativos para el MVP de Samay Care.

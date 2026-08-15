@@ -3,9 +3,34 @@ import { MessageCircle, Mic, Send, Square, X } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import { HOSPITAL, wellnessActivities } from "@/lib/samay-data";
 import { askAssistant } from "@/lib/chat.functions";
-import { recordQuery, type TopicKey } from "@/lib/simulation";
+import {
+  recordQuery,
+  roleIcons,
+  roleLabels,
+  roleOrder,
+  type RoleKey,
+  type TopicKey,
+} from "@/lib/simulation";
 
-type Msg = { role: "bot" | "user"; text: string; cards?: boolean; pending?: boolean };
+type Msg = {
+  role: "bot" | "user";
+  text: string;
+  cards?: boolean;
+  pending?: boolean;
+  pausa?: boolean;
+};
+
+const PAUSA_STEPS = [
+  { title: "Respiración 4-4-6", detail: "Inhala 4 s, sostén 4 s, exhala 6 s. Repite con calma." },
+  { title: "Cuello", detail: "Inclina la cabeza a cada hombro 20 s y gira lentamente." },
+  { title: "Hombros y brazos", detail: "Eleva y suelta los hombros 10 veces; estira los brazos." },
+  { title: "Espalda", detail: "De pie, estira hacia el techo y baja soltando el cuello." },
+  { title: "Vista y manos", detail: "Regla 20-20-20 y abre/cierra los puños 15 veces." },
+];
+
+const REMINDER =
+  "¡Listo! 🎉 Recuerda: todos los miércoles hay pausas activas en el Instituto Nacional de Salud del Niño San Borja.";
+
 
 
 const norm = (t: string) =>
@@ -118,7 +143,10 @@ function answer(input: string): Msg {
   const topic = classify(input);
 
   const symptom = detectSymptom(t);
-  if (symptom) return { role: "bot", text: symptom.text, cards: symptom.topic === "pausas" };
+  if (symptom) {
+    const short = `${symptom.text.split(". ")[0]}. Te propongo una pausa activa guiada de 5 minutos 👇`;
+    return { role: "bot", text: short, pausa: true };
+  }
 
   if (topic === "plataforma") {
     if (
@@ -129,69 +157,70 @@ function answer(input: string): Msg {
     )
       return {
         role: "bot",
-        text: "Los indicadores de Samay Care son: IRSO (Índice de Riesgo de Sobrecarga Organizacional, 0-100: bajo 0-49, moderado 50-69, alto 70-100), Carga de trabajo, Duración de turnos, Demanda de atenciones, Ausentismo, Recuperación (descanso entre jornadas), Incidencias y Distribución de tareas. Además verás la Tendencia (variación % del IRSO) y el Horario crítico de cada servicio. Sirven para anticipar la sobrecarga por servicio y tomar decisiones preventivas; no evalúan a personas.",
+        text: "Indicadores: IRSO (0-100), carga de trabajo, duración de turnos, demanda, ausentismo, recuperación, incidencias y distribución de tareas. Sirven para anticipar la sobrecarga por servicio.",
       };
     if (t.includes("chatbot") || t.includes("asistente") || t.includes("voz"))
       return {
         role: "bot",
-        text: "Puedes usar el asistente de dos formas: escribiendo tu consulta o pulsando el micrófono para hablar (tienes hasta 15 segundos y luego te doy la recomendación). También puedes tocar los botones rápidos. Cada consulta se registra en la Línea de Tiempo de la simulación.",
+        text: "Escríbeme o pulsa el micrófono (15 s) y te doy una recomendación. Cada consulta suma en la Línea de Tiempo.",
       };
 
     if (t.includes("irso"))
       return {
         role: "bot",
-        text: "El IRSO es el Índice de Riesgo de Sobrecarga Organizacional (0 a 100). Es un indicador preventivo a nivel de servicio: no diagnostica burnout ni evalúa individualmente a los trabajadores.",
+        text: "El IRSO es el Índice de Riesgo de Sobrecarga Organizacional (0-100) por servicio. Es preventivo: no evalúa a personas.",
       };
     if (t.includes("para que sirve") || t.includes("para qué sirve"))
       return {
         role: "bot",
-        text: `Samay Care sirve para anticipar la sobrecarga organizacional en el ${HOSPITAL.name}: detecta señales tempranas por servicio, orienta decisiones preventivas de jefaturas y Salud Ocupacional, y promueve actividades de bienestar para el personal.`,
+        text: `Sirve para anticipar la sobrecarga en el ${HOSPITAL.name} y activar medidas preventivas de bienestar.`,
       };
     if (t.includes("mapa") || t.includes("dashboard") || t.includes("tiempo"))
       return {
         role: "bot",
-        text: "Mapa de Calor: riesgo por servicio sobre el plano del instituto. Dashboard: evolución del IRSO, demanda, ausencias e incidencias. Línea de Tiempo: cuándo comenzó el incremento del riesgo y el registro de tu simulación.",
+        text: "Mapa de Calor: riesgo por servicio. Dashboard: evolución del IRSO y demanda. Línea de Tiempo: cronología y registro de la simulación.",
       };
     if (t.includes("simulacion") || t.includes("simulación"))
       return {
         role: "bot",
-        text: "La simulación se inicia con el botón 'Iniciar simulación' del menú superior. Todos los contadores parten en 0 y se van sumando según las consultas que hagas aquí; puedes verlos en la Línea de Tiempo.",
+        text: "Inicia la simulación desde el menú superior; todo parte en 0 y suma con cada consulta.",
       };
     return {
       role: "bot",
-      text: "Samay Care es una plataforma preventiva: recolecta datos operativos del hospital, los analiza y calcula el IRSO por servicio para detectar riesgo de sobrecarga antes de que afecte al personal y a la atención. Navega con Mapa de Calor, Dashboard y Línea de Tiempo.",
+      text: "Samay Care detecta señales de sobrecarga por servicio y recomienda acciones preventivas de bienestar.",
     };
   }
 
   if (topic === "bienestar")
     return {
       role: "bot",
-      text: `Estas son algunas actividades y recursos de bienestar disponibles. Puedes consultar las actividades programadas por el ${HOSPITAL.name}.`,
+      text: "Estas son actividades de bienestar del instituto 👇",
       cards: true,
     };
   if (topic === "pausas")
     return {
       role: "bot",
-      text: "Las pausas activas son ejercicios breves de 5 a 10 minutos durante la jornada: respiración guiada, movilidad de cuello y hombros, y estiramientos de espalda. Se recomiendan especialmente en los horarios críticos de cada servicio.",
-      cards: true,
+      text: "Las pausas activas duran 5-10 min y se recomiendan cada 2 horas. ¿Hacemos una ahora? 👇",
+      pausa: true,
     };
   if (topic === "institucional")
     return {
       role: "bot",
-      text: "Las actividades institucionales se publican en el calendario interno del instituto: talleres, campañas de salud ocupacional y jornadas de bienestar. Puedes consultar el calendario con tu área de Salud Ocupacional.",
+      text: "Talleres, campañas y jornadas se publican en el calendario interno; consúltalo con Salud Ocupacional. 👇",
       cards: true,
     };
   if (topic === "apoyo")
     return {
       role: "bot",
-      text: "Recursos de apoyo disponibles: orientación de Salud Ocupacional, canales de acompañamiento al personal, guías de manejo de carga laboral y espacios de descanso. Si necesitas atención prioritaria, comunícate con tu jefatura de servicio.",
+      text: "Puedes acudir a Salud Ocupacional, a los canales de acompañamiento o a tu jefatura de servicio.",
     };
 
   return {
     role: "bot",
-    text: "Cuéntame también cómo te sientes (por ejemplo: “me duele el cuello”, “estoy agotada”) y te daré una pausa activa o recurso de apoyo. Puedo orientarte sobre actividades de bienestar, pausas activas, actividades institucionales, recursos de apoyo y el uso de la plataforma (cómo funciona, para qué sirve, cómo usar el chatbot). Elige una opción rápida o escríbeme tu consulta.",
+    text: "Cuéntame cómo te sientes o elige una opción: bienestar, pausas activas, actividades institucionales, apoyo o indicadores.",
   };
 }
+
 
 const MAX_LISTEN_MS = 15000;
 
@@ -201,16 +230,19 @@ export function Chatbot() {
   const [listening, setListening] = useState(false);
   const [secondsLeft, setSecondsLeft] = useState(15);
   const [voiceError, setVoiceError] = useState<string | null>(null);
+  const [userRole, setUserRole] = useState<RoleKey | null>(null);
+  const [pausaLeft, setPausaLeft] = useState<number | null>(null);
   const [messages, setMessages] = useState<Msg[]>([
     {
       role: "bot",
-      text: "Hola 👋 Soy Samay Care. Puedes escribirme o hablarme con el micrófono (15 s). Cuéntame cómo te sientes o pregúntame cómo funciona la plataforma",
+      text: "Hola 👋 Soy Samay Care. Antes de empezar, ¿cuál es tu cargo en el instituto?",
     },
   ]);
   const endRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const tickRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const pausaRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const transcriptRef = useRef("");
 
   useEffect(() => {
@@ -219,11 +251,47 @@ export function Chatbot() {
 
   const ask = useServerFn(askAssistant);
 
+  const chooseRole = (key: RoleKey) => {
+    setUserRole(key);
+    setMessages((m) => [
+      ...m,
+      { role: "user", text: roleLabels[key] },
+      {
+        role: "bot",
+        text: `¡Gracias! 😊 Ahora sí: escríbeme o usa el micrófono (15 s). Cuéntame cómo te sientes o pregúntame por la plataforma.`,
+      },
+    ]);
+  };
+
+  const startPausa = () => {
+    if (pausaRef.current) return;
+    setPausaLeft(300);
+    pausaRef.current = setInterval(() => {
+      setPausaLeft((s) => {
+        if (s === null) return s;
+        if (s <= 1) {
+          if (pausaRef.current) clearInterval(pausaRef.current);
+          pausaRef.current = null;
+          setMessages((m) => [...m, { role: "bot", text: REMINDER }]);
+          return null;
+        }
+        return s - 1;
+      });
+    }, 1000);
+  };
+
+  const stopPausa = (finished = false) => {
+    if (pausaRef.current) clearInterval(pausaRef.current);
+    pausaRef.current = null;
+    setPausaLeft(null);
+    if (finished) setMessages((m) => [...m, { role: "bot", text: REMINDER }]);
+  };
+
   const send = (text: string, via: "texto" | "voz" = "texto", local = false) => {
     const value = text.trim();
     if (!value) return;
     const fallback = answer(value);
-    recordQuery(classify(value), value, via);
+    recordQuery(classify(value), value, via, userRole);
     setInput("");
 
     if (local) {
@@ -256,6 +324,7 @@ export function Chatbot() {
             role: "bot",
             text: res.text?.trim() || fallback.text,
             ...(fallback.cards ? { cards: true } : {}),
+            ...(fallback.pausa ? { pausa: true } : {}),
           };
 
           return next;
@@ -269,6 +338,7 @@ export function Chatbot() {
         });
       });
   };
+
 
 
   const clearTimers = () => {
@@ -342,7 +412,14 @@ export function Chatbot() {
     }, MAX_LISTEN_MS);
   };
 
-  useEffect(() => () => clearTimers(), []);
+  useEffect(
+    () => () => {
+      clearTimers();
+      if (pausaRef.current) clearInterval(pausaRef.current);
+    },
+    [],
+  );
+
 
   return (
     <>
@@ -409,12 +486,81 @@ export function Chatbot() {
                     </p>
                   </div>
                 )}
+                {m.pausa && pausaLeft === null && (
+                  <button
+                    onClick={startPausa}
+                    className="mt-2 rounded-full cta-gradient px-4 py-2 text-xs font-semibold"
+                  >
+                    ▶️ Iniciar pausa activa (5 min)
+                  </button>
+                )}
               </div>
             ))}
+
+            {!userRole && (
+              <div className="flex flex-wrap gap-1.5">
+                {roleOrder.map((k) => (
+                  <button
+                    key={k}
+                    onClick={() => chooseRole(k)}
+                    className="rounded-full border border-border px-2.5 py-1 text-[11px] text-deep transition-colors hover:bg-sky-soft"
+                  >
+                    {roleIcons[k]} {roleLabels[k]}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {pausaLeft !== null && (
+              <div className="surface-card space-y-2 p-3">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-semibold text-deep">🧘 Pausa activa guiada</p>
+                  <span className="font-display text-lg font-semibold text-deep">
+                    {String(Math.floor(pausaLeft / 60)).padStart(2, "0")}:
+                    {String(pausaLeft % 60).padStart(2, "0")}
+                  </span>
+                </div>
+                {(() => {
+                  const idx = Math.min(
+                    PAUSA_STEPS.length - 1,
+                    Math.floor((300 - pausaLeft) / 60),
+                  );
+                  const step = PAUSA_STEPS[idx]!;
+                  return (
+                    <div className="rounded-xl bg-leaf-soft px-3 py-2">
+                      <p className="text-xs font-semibold text-deep">
+                        Paso {idx + 1}/5 · {step.title}
+                      </p>
+                      <p className="text-xs text-muted-foreground">{step.detail}</p>
+                    </div>
+                  );
+                })()}
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => stopPausa(true)}
+                    className="rounded-full bg-sky-soft px-3 py-1 text-[11px] font-medium text-deep"
+                  >
+                    Terminar ahora
+                  </button>
+                  <button
+                    onClick={() => stopPausa(false)}
+                    className="rounded-full border border-border px-3 py-1 text-[11px] text-deep"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            )}
             <div ref={endRef} />
           </div>
 
+
           <div className="border-t border-border bg-card px-3 pb-3 pt-2">
+            {!userRole && (
+              <p className="mb-2 text-[11px] text-muted-foreground">
+                Selecciona tu cargo para continuar.
+              </p>
+            )}
             {listening && (
               <div className="mb-2 flex items-center gap-2 rounded-xl bg-leaf-soft px-3 py-2 text-[11px] font-medium text-deep">
                 <span className="inline-block h-2 w-2 animate-pulse rounded-full bg-primary" />
@@ -424,7 +570,8 @@ export function Chatbot() {
             {voiceError && (
               <p className="mb-2 text-[11px] text-muted-foreground">{voiceError}</p>
             )}
-            <div className="mb-2 flex flex-wrap gap-1.5">
+            <div className={`mb-2 flex flex-wrap gap-1.5 ${userRole ? "" : "hidden"}`}>
+
               {quick.map((q) => (
                 <button
                   key={q.key}
@@ -458,13 +605,16 @@ export function Chatbot() {
               <input
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder="Escribe o habla tu consulta..."
-                className="h-10 flex-1 rounded-full border border-input bg-background px-4 text-sm outline-none focus:ring-2 focus:ring-ring/40"
+                disabled={!userRole}
+                placeholder={userRole ? "Escribe o habla tu consulta..." : "Elige tu cargo arriba"}
+                className="h-10 flex-1 rounded-full border border-input bg-background px-4 text-sm outline-none focus:ring-2 focus:ring-ring/40 disabled:opacity-60"
               />
               <button
                 type="button"
+                disabled={!userRole}
                 onClick={listening ? stopListening : startListening}
                 aria-label={listening ? "Detener grabación" : "Hablar con el asistente"}
+
                 className={`inline-flex h-10 w-10 items-center justify-center rounded-full border border-border transition-colors ${
                   listening ? "bg-leaf-soft" : "hover:bg-sky-soft"
                 }`}
