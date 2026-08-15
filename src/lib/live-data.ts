@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import {
   demandData,
   irsoEvolution,
@@ -37,17 +38,25 @@ const zeroWorkshops = wellnessWorkshops.map((w) => ({
   sessions: w.sessions.map((s) => ({ ...s, participantes: 0 })),
 }));
 
+function useHydrated() {
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => setHydrated(true), []);
+  return hydrated;
+}
+
 export function useLiveData() {
   const { active } = useSimulation();
-  const liveServices = active ? services : zeroServices;
+  const hydrated = useHydrated();
+  const live = active && hydrated;
+  const liveServices = live ? services : zeroServices;
   return {
     active,
     services: liveServices,
-    irsoVariables: active ? irsoVariables : zeroIrsoVariables,
-    irsoEvolution: active ? irsoEvolution : zeroIrsoEvolution,
-    demandData: active ? demandData : zeroDemand,
-    reportTrend: active ? reportTrend : zeroReportTrend,
-    wellnessWorkshops: active ? wellnessWorkshops : zeroWorkshops,
+    irsoVariables: live ? irsoVariables : zeroIrsoVariables,
+    irsoEvolution: live ? irsoEvolution : zeroIrsoEvolution,
+    demandData: live ? demandData : zeroDemand,
+    reportTrend: live ? reportTrend : zeroReportTrend,
+    wellnessWorkshops: live ? wellnessWorkshops : zeroWorkshops,
     riskByService: liveServices.map((s) => ({ servicio: s.name, irso: s.irso })),
   };
 }
