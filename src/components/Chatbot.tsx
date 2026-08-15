@@ -143,7 +143,10 @@ function answer(input: string): Msg {
   const topic = classify(input);
 
   const symptom = detectSymptom(t);
-  if (symptom) return { role: "bot", text: symptom.text, cards: symptom.topic === "pausas" };
+  if (symptom) {
+    const short = `${symptom.text.split(". ")[0]}. Te propongo una pausa activa guiada de 5 minutos 👇`;
+    return { role: "bot", text: short, pausa: true };
+  }
 
   if (topic === "plataforma") {
     if (
@@ -154,69 +157,70 @@ function answer(input: string): Msg {
     )
       return {
         role: "bot",
-        text: "Los indicadores de Samay Care son: IRSO (Índice de Riesgo de Sobrecarga Organizacional, 0-100: bajo 0-49, moderado 50-69, alto 70-100), Carga de trabajo, Duración de turnos, Demanda de atenciones, Ausentismo, Recuperación (descanso entre jornadas), Incidencias y Distribución de tareas. Además verás la Tendencia (variación % del IRSO) y el Horario crítico de cada servicio. Sirven para anticipar la sobrecarga por servicio y tomar decisiones preventivas; no evalúan a personas.",
+        text: "Indicadores: IRSO (0-100), carga de trabajo, duración de turnos, demanda, ausentismo, recuperación, incidencias y distribución de tareas. Sirven para anticipar la sobrecarga por servicio.",
       };
     if (t.includes("chatbot") || t.includes("asistente") || t.includes("voz"))
       return {
         role: "bot",
-        text: "Puedes usar el asistente de dos formas: escribiendo tu consulta o pulsando el micrófono para hablar (tienes hasta 15 segundos y luego te doy la recomendación). También puedes tocar los botones rápidos. Cada consulta se registra en la Línea de Tiempo de la simulación.",
+        text: "Escríbeme o pulsa el micrófono (15 s) y te doy una recomendación. Cada consulta suma en la Línea de Tiempo.",
       };
 
     if (t.includes("irso"))
       return {
         role: "bot",
-        text: "El IRSO es el Índice de Riesgo de Sobrecarga Organizacional (0 a 100). Es un indicador preventivo a nivel de servicio: no diagnostica burnout ni evalúa individualmente a los trabajadores.",
+        text: "El IRSO es el Índice de Riesgo de Sobrecarga Organizacional (0-100) por servicio. Es preventivo: no evalúa a personas.",
       };
     if (t.includes("para que sirve") || t.includes("para qué sirve"))
       return {
         role: "bot",
-        text: `Samay Care sirve para anticipar la sobrecarga organizacional en el ${HOSPITAL.name}: detecta señales tempranas por servicio, orienta decisiones preventivas de jefaturas y Salud Ocupacional, y promueve actividades de bienestar para el personal.`,
+        text: `Sirve para anticipar la sobrecarga en el ${HOSPITAL.name} y activar medidas preventivas de bienestar.`,
       };
     if (t.includes("mapa") || t.includes("dashboard") || t.includes("tiempo"))
       return {
         role: "bot",
-        text: "Mapa de Calor: riesgo por servicio sobre el plano del instituto. Dashboard: evolución del IRSO, demanda, ausencias e incidencias. Línea de Tiempo: cuándo comenzó el incremento del riesgo y el registro de tu simulación.",
+        text: "Mapa de Calor: riesgo por servicio. Dashboard: evolución del IRSO y demanda. Línea de Tiempo: cronología y registro de la simulación.",
       };
     if (t.includes("simulacion") || t.includes("simulación"))
       return {
         role: "bot",
-        text: "La simulación se inicia con el botón 'Iniciar simulación' del menú superior. Todos los contadores parten en 0 y se van sumando según las consultas que hagas aquí; puedes verlos en la Línea de Tiempo.",
+        text: "Inicia la simulación desde el menú superior; todo parte en 0 y suma con cada consulta.",
       };
     return {
       role: "bot",
-      text: "Samay Care es una plataforma preventiva: recolecta datos operativos del hospital, los analiza y calcula el IRSO por servicio para detectar riesgo de sobrecarga antes de que afecte al personal y a la atención. Navega con Mapa de Calor, Dashboard y Línea de Tiempo.",
+      text: "Samay Care detecta señales de sobrecarga por servicio y recomienda acciones preventivas de bienestar.",
     };
   }
 
   if (topic === "bienestar")
     return {
       role: "bot",
-      text: `Estas son algunas actividades y recursos de bienestar disponibles. Puedes consultar las actividades programadas por el ${HOSPITAL.name}.`,
+      text: "Estas son actividades de bienestar del instituto 👇",
       cards: true,
     };
   if (topic === "pausas")
     return {
       role: "bot",
-      text: "Las pausas activas son ejercicios breves de 5 a 10 minutos durante la jornada: respiración guiada, movilidad de cuello y hombros, y estiramientos de espalda. Se recomiendan especialmente en los horarios críticos de cada servicio.",
-      cards: true,
+      text: "Las pausas activas duran 5-10 min y se recomiendan cada 2 horas. ¿Hacemos una ahora? 👇",
+      pausa: true,
     };
   if (topic === "institucional")
     return {
       role: "bot",
-      text: "Las actividades institucionales se publican en el calendario interno del instituto: talleres, campañas de salud ocupacional y jornadas de bienestar. Puedes consultar el calendario con tu área de Salud Ocupacional.",
+      text: "Talleres, campañas y jornadas se publican en el calendario interno; consúltalo con Salud Ocupacional. 👇",
       cards: true,
     };
   if (topic === "apoyo")
     return {
       role: "bot",
-      text: "Recursos de apoyo disponibles: orientación de Salud Ocupacional, canales de acompañamiento al personal, guías de manejo de carga laboral y espacios de descanso. Si necesitas atención prioritaria, comunícate con tu jefatura de servicio.",
+      text: "Puedes acudir a Salud Ocupacional, a los canales de acompañamiento o a tu jefatura de servicio.",
     };
 
   return {
     role: "bot",
-    text: "Cuéntame también cómo te sientes (por ejemplo: “me duele el cuello”, “estoy agotada”) y te daré una pausa activa o recurso de apoyo. Puedo orientarte sobre actividades de bienestar, pausas activas, actividades institucionales, recursos de apoyo y el uso de la plataforma (cómo funciona, para qué sirve, cómo usar el chatbot). Elige una opción rápida o escríbeme tu consulta.",
+    text: "Cuéntame cómo te sientes o elige una opción: bienestar, pausas activas, actividades institucionales, apoyo o indicadores.",
   };
 }
+
 
 const MAX_LISTEN_MS = 15000;
 
