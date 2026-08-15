@@ -412,7 +412,14 @@ export function Chatbot() {
     }, MAX_LISTEN_MS);
   };
 
-  useEffect(() => () => clearTimers(), []);
+  useEffect(
+    () => () => {
+      clearTimers();
+      if (pausaRef.current) clearInterval(pausaRef.current);
+    },
+    [],
+  );
+
 
   return (
     <>
