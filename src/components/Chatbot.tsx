@@ -499,6 +499,23 @@ export function Chatbot() {
                     ▶️ Iniciar pausa activa (5 min)
                   </button>
                 )}
+                {m.pausa && (
+                  <div className="mt-2 space-y-1.5 rounded-xl border border-border bg-background/60 p-2.5">
+                    <p className="text-[11px] font-semibold text-deep">🎬 Videos recomendados</p>
+                    {PAUSA_VIDEOS.map((v) => (
+                      <a
+                        key={v.url}
+                        href={v.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="block rounded-lg bg-sky-soft px-2.5 py-1.5 text-[11px] font-medium text-deep transition-opacity hover:opacity-80"
+                      >
+                        ▶ {v.title}
+                      </a>
+                    ))}
+                  </div>
+                )}
+
               </div>
             ))}
 
