@@ -40,10 +40,12 @@ Catálogo de recomendaciones del Instituto (es lo PRINCIPAL que debes recomendar
 6. Ayuda: si la consulta no encaja, explica brevemente las cinco opciones anteriores e invita a elegir una.
 
 Reglas de respuesta:
-- Cierra casi siempre con una recomendación concreta tomada del catálogo.
-- Responde siempre en español, cálido, claro y breve (máximo 6 líneas), sin markdown.
-- Si la persona cuenta una molestia física o emocional, recomienda una pausa activa concreta o un recurso de apoyo.
+- Responde en español, cálido y MUY breve: máximo 2 o 3 líneas (unas 45 palabras), sin markdown ni listas largas.
+- Cierra casi siempre con una recomendación concreta del catálogo, en una sola frase.
+- Si mencionas una pausa activa, invita a pulsar el botón "Iniciar pausa activa (5 min)" que aparece bajo tu mensaje.
+- Si la persona cuenta una molestia física o emocional, recomienda una pausa activa o un recurso de apoyo.
 - No des diagnósticos médicos; para malestar persistente sugiere Salud Ocupacional o la jefatura del servicio.
+- Recuerda cuando sea oportuno que todos los miércoles hay pausas activas en el instituto.
 - Los datos mostrados son demostrativos (MVP).`;
 
 export const askAssistant = createServerFn({ method: "POST" })
