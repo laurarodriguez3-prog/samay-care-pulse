@@ -205,3 +205,112 @@ export const wellnessActivities = [
   { title: "Taller de bienestar", meta: "Fecha: Próximamente", icon: "🌿" },
   { title: "Actividad institucional", meta: "Consultar calendario", icon: "📅" },
 ];
+
+export type WellnessSession = { label: string; participantes: number };
+
+export type WellnessWorkshop = {
+  id: string;
+  name: string;
+  icon: string;
+  service: string;
+  startParticipants: number;
+  activeParticipants: number;
+  avgAttendance: number;
+  dropoutRate: number;
+  retention30: number;
+  sessions: WellnessSession[];
+};
+
+export const SANARTE_PROGRAM = {
+  name: "Programa SANARTE",
+  description:
+    "Actividades de bienestar del Instituto Nacional de Salud del Niño San Borja: Yoga, Tejido, Improvisación, Escritura y Coro.",
+};
+
+export const wellnessWorkshops: WellnessWorkshop[] = [
+  {
+    id: "yoga",
+    name: "Yoga",
+    icon: "🧘",
+    service: "Emergencias",
+    startParticipants: 40,
+    activeParticipants: 3,
+    avgAttendance: 34,
+    dropoutRate: 93,
+    retention30: 8,
+    sessions: [
+      { label: "S1", participantes: 40 },
+      { label: "S2", participantes: 26 },
+      { label: "S3", participantes: 12 },
+      { label: "S4", participantes: 3 },
+    ],
+  },
+  {
+    id: "tejido",
+    name: "Tejido",
+    icon: "🧶",
+    service: "Hospitalización",
+    startParticipants: 28,
+    activeParticipants: 17,
+    avgAttendance: 68,
+    dropoutRate: 39,
+    retention30: 61,
+    sessions: [
+      { label: "S1", participantes: 28 },
+      { label: "S2", participantes: 24 },
+      { label: "S3", participantes: 19 },
+      { label: "S4", participantes: 17 },
+    ],
+  },
+  {
+    id: "impro",
+    name: "Improvisación (Impro)",
+    icon: "🎭",
+    service: "UCI",
+    startParticipants: 22,
+    activeParticipants: 9,
+    avgAttendance: 47,
+    dropoutRate: 59,
+    retention30: 41,
+    sessions: [
+      { label: "S1", participantes: 22 },
+      { label: "S2", participantes: 16 },
+      { label: "S3", participantes: 11 },
+      { label: "S4", participantes: 9 },
+    ],
+  },
+  {
+    id: "escritura",
+    name: "Escritura",
+    icon: "✍️",
+    service: "Consultorios",
+    startParticipants: 18,
+    activeParticipants: 14,
+    avgAttendance: 72,
+    dropoutRate: 22,
+    retention30: 78,
+    sessions: [
+      { label: "S1", participantes: 18 },
+      { label: "S2", participantes: 16 },
+      { label: "S3", participantes: 15 },
+      { label: "S4", participantes: 14 },
+    ],
+  },
+  {
+    id: "coro",
+    name: "Coro",
+    icon: "🎶",
+    service: "Hospitalización",
+    startParticipants: 35,
+    activeParticipants: 21,
+    avgAttendance: 63,
+    dropoutRate: 40,
+    retention30: 60,
+    sessions: [
+      { label: "S1", participantes: 35 },
+      { label: "S2", participantes: 29 },
+      { label: "S3", participantes: 24 },
+      { label: "S4", participantes: 21 },
+    ],
+  },
+];

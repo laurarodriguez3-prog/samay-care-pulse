@@ -145,10 +145,16 @@ function emit() {
 }
 
 function subscribe(listener: () => void) {
-  hydrate();
   listeners.add(listener);
-  listener();
-  return () => listeners.delete(listener);
+  if (!hydrated) {
+    queueMicrotask(() => {
+      hydrate();
+      listeners.forEach((l) => l());
+    });
+  }
+  return () => {
+    listeners.delete(listener);
+  };
 }
 
 export function startSimulation() {
