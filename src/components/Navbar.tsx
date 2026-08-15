@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
 import logo from "@/assets/samay-care-logo.png.asset.json";
+import { startSimulation, stopSimulation, useSimulation } from "@/lib/simulation";
 
 const links = [
   { to: "/mapa", label: "Mapa de Calor" },
