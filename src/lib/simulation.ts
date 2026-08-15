@@ -147,7 +147,7 @@ function emit() {
 function subscribe(listener: () => void) {
   listeners.add(listener);
   if (!hydrated) {
-    queueMicrotask(() => {
+    setTimeout(() => {
       hydrate();
       listeners.forEach((l) => l());
     });

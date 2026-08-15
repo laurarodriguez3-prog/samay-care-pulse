@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { riskColor, type Service, type WellnessWorkshop } from "@/lib/samay-data";
 import { useLiveData } from "@/lib/live-data";
 
@@ -84,21 +85,32 @@ function WorkshopCard({ w }: { w: WellnessWorkshop }) {
   );
 }
 
-export function SanartePanel({ selected }: { selected: Service }) {
-  const { active, wellnessWorkshops: workshops } = useLiveData();
+export function SanartePanel({
+  selected,
+  onSelect,
+}: {
+  selected: Service;
+  onSelect?: (s: Service) => void;
+}) {
+  const { active, wellnessWorkshops: workshops, services: liveServices } = useLiveData();
+  const [filter, setFilter] = useState<string>("todos");
 
-  const totalActive = workshops.reduce((a, w) => a + w.activeParticipants, 0);
-  const totalStart = workshops.reduce((a, w) => a + w.startParticipants, 0);
-  const avgRetention = workshops.length
-    ? Math.round(workshops.reduce((a, w) => a + w.retention30, 0) / workshops.length)
+  const shown = filter === "todos" ? workshops : workshops.filter((w) => w.service === filter);
+
+  const totalActive = shown.reduce((a, w) => a + w.activeParticipants, 0);
+  const totalStart = shown.reduce((a, w) => a + w.startParticipants, 0);
+  const avgRetention = shown.length
+    ? Math.round(shown.reduce((a, w) => a + w.retention30, 0) / shown.length)
     : 0;
-  const avgAttendance = workshops.length
-    ? Math.round(workshops.reduce((a, w) => a + w.avgAttendance, 0) / workshops.length)
+  const avgAttendance = shown.length
+    ? Math.round(shown.reduce((a, w) => a + w.avgAttendance, 0) / shown.length)
     : 0;
 
   const linked = workshops.filter((w) => w.service === selected.name);
   const lowParticipation = linked.some((w) => w.retention30 < 40);
   const crossAlert = active && selected.irso >= 65 && lowParticipation;
+
+  const filterService = liveServices.find((s) => s.name === filter);
 
   return (
     <div className="flex flex-col gap-3">
@@ -110,6 +122,38 @@ export function SanartePanel({ selected }: { selected: Service }) {
         <p className="mt-1 text-xs text-muted-foreground">
           Yoga, Tejido, Impro, Escritura y Coro: participación, asistencia y permanencia en el tiempo.
         </p>
+
+        <label className="mt-3 block text-[11px] uppercase tracking-wide text-muted-foreground">
+          Servicio
+        </label>
+        <select
+          value={filter}
+          onChange={(e) => {
+            const value = e.target.value;
+            setFilter(value);
+            const svc = liveServices.find((s) => s.name === value);
+            if (svc) onSelect?.(svc);
+          }}
+          className="mt-1 w-full rounded-xl border border-border bg-background px-3 py-2 text-sm text-deep outline-none focus:ring-2 focus:ring-primary/50"
+        >
+          <option value="todos">Todos los servicios</option>
+          {liveServices.map((s) => (
+            <option key={s.id} value={s.name}>
+              {s.icon} {s.name}
+            </option>
+          ))}
+        </select>
+
+        {filterService && (
+          <p className="mt-2 text-xs text-muted-foreground">
+            IRSO del servicio:{" "}
+            <span className="font-semibold" style={{ color: riskColor[filterService.risk] }}>
+              {filterService.irso}/100
+            </span>{" "}
+            · {shown.length} taller(es) SANARTE asociados
+          </p>
+        )}
+
         <div className="mt-3 grid grid-cols-3 gap-2">
           <Metric label="Activos" value={`${totalActive}/${totalStart}`} />
           <Metric label="Asistencia prom." value={`${avgAttendance}%`} />
@@ -137,7 +181,7 @@ export function SanartePanel({ selected }: { selected: Service }) {
         </div>
       )}
 
-      {workshops.map((w) => (
+      {shown.map((w) => (
         <WorkshopCard key={w.id} w={w} />
       ))}
 
