@@ -428,16 +428,23 @@ export function Chatbot() {
               {quick.map((q) => (
                 <button
                   key={q.key}
-                  onClick={() => send(q.label)}
+                  onClick={() => send(q.label, "texto", true)}
                   className="rounded-full border border-border px-2.5 py-1 text-[11px] text-deep transition-colors hover:bg-sky-soft"
                 >
                   {q.label}
                 </button>
               ))}
               <button
-                onClick={() => send("¿Cómo funciona la plataforma?")}
+                onClick={() => send("¿Cuáles son los indicadores y para qué sirven?", "texto", true)}
                 className="rounded-full border border-border px-2.5 py-1 text-[11px] text-deep transition-colors hover:bg-sky-soft"
               >
+                📊 Indicadores
+              </button>
+              <button
+                onClick={() => send("¿Cómo funciona la plataforma?", "texto", true)}
+                className="rounded-full border border-border px-2.5 py-1 text-[11px] text-deep transition-colors hover:bg-sky-soft"
+              >
+
                 🧭 ¿Cómo funciona la plataforma?
               </button>
             </div>
