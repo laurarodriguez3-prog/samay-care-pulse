@@ -5,6 +5,68 @@ import { recordQuery, type TopicKey } from "@/lib/simulation";
 
 type Msg = { role: "bot" | "user"; text: string; cards?: boolean };
 
+const norm = (t: string) =>
+  t.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+type Symptom = { keys: string[]; topic: TopicKey; text: string };
+
+const symptoms: Symptom[] = [
+  {
+    keys: ["cuello", "cervical", "nuca", "torticolis", "hombro", "trapecio"],
+    topic: "pausas",
+    text: "Sentir tensión en cuello y hombros es muy común en turnos largos. Pausa activa recomendada (5 min): 1) Inclina la cabeza hacia cada hombro y mantén 20 s por lado. 2) Gira lentamente la cabeza de un lado al otro, 10 repeticiones. 3) Eleva y suelta los hombros 10 veces. 4) Respira profundo 4-4-6 (inhala 4 s, sostén 4 s, exhala 6 s). Repite cada 2 horas y evita mirar pantallas por debajo de la línea de los ojos. Si el dolor persiste más de 3 días, comunícate con Salud Ocupacional.",
+  },
+  {
+    keys: ["espalda", "lumbar", "cintura", "columna"],
+    topic: "pausas",
+    text: "Para la molestia en la espalda: 1) Ponte de pie y estira los brazos hacia el techo 15 s. 2) Inclínate suavemente hacia adelante soltando el cuello, 20 s. 3) Haz báscula pélvica (10 repeticiones) apoyando la espalda en la pared. 4) Camina 3 minutos. Revisa la altura de tu silla y evita cargar peso con la espalda flexionada.",
+  },
+  {
+    keys: ["pierna", "pies", "varices", "de pie", "parado", "parada", "rodilla"],
+    topic: "pausas",
+    text: "Si pasas muchas horas de pie: 1) Eleva los talones 15 veces para activar la circulación. 2) Estira los gemelos contra la pared, 20 s por pierna. 3) Siéntate 5 minutos con las piernas elevadas al terminar el turno. 4) Alterna el peso entre ambos pies mientras estés parada/o.",
+  },
+  {
+    keys: ["ojos", "vista", "pantalla", "cabeza", "cefalea", "migrana", "jaqueca"],
+    topic: "pausas",
+    text: "Para fatiga visual y dolor de cabeza aplica la regla 20-20-20: cada 20 minutos mira 20 segundos a un punto lejano. Suma: parpadeo consciente 10 veces, masaje suave en sienes 30 s, hidratación (un vaso de agua) y bajar el brillo de la pantalla. Si el dolor es intenso o recurrente, acude a Salud Ocupacional.",
+  },
+  {
+    keys: ["cansad", "agotad", "fatiga", "sin energia", "no doy mas", "extenuad", "sueno", "dormir", "insomnio"],
+    topic: "apoyo",
+    text: "El cansancio sostenido es una señal temprana de sobrecarga. Hoy: 1) Toma una micro-pausa de 10 minutos fuera del área asistencial. 2) Hidrátate y come algo ligero. 3) Haz respiración 4-7-8 durante 2 minutos. 4) Antes de dormir, evita pantallas 30 minutos y mantén un horario fijo de descanso. Si el agotamiento se repite varios días, coordina con tu jefatura una revisión de la distribución de turnos y avisa a Salud Ocupacional.",
+  },
+  {
+    keys: ["estres", "estresad", "ansiedad", "ansios", "nervios", "presion", "abrumad", "saturad", "sobrecarg", "colaps"],
+    topic: "apoyo",
+    text: "Cuando la carga se siente abrumadora: 1) Respiración cuadrada 4-4-4-4 durante 2 minutos. 2) Escribe las 3 tareas realmente prioritarias del turno y delega o posterga el resto. 3) Toma una pausa activa de 5 minutos cada 2 horas. 4) Habla con tu jefatura de servicio y con Salud Ocupacional: la sobrecarga es un tema organizacional, no una falla personal.",
+  },
+  {
+    keys: ["triste", "desanimad", "solo", "sola", "llorar", "desmotivad", "irritab", "enojad", "frustrad"],
+    topic: "apoyo",
+    text: "Gracias por contarlo, lo que sientes es válido. Sugerencias: 1) Tómate 10 minutos en un espacio tranquilo y haz respiración lenta. 2) Conversa con una persona de confianza del equipo. 3) Solicita orientación en Salud Ocupacional o en los canales de acompañamiento al personal. 4) Participa en una actividad de bienestar del calendario institucional. Si sientes malestar intenso o persistente, busca atención prioritaria con tu jefatura.",
+  },
+  {
+    keys: ["mano", "muneca", "tunel", "dedos", "tecleando", "digitar"],
+    topic: "pausas",
+    text: "Para manos y muñecas: 1) Abre y cierra los puños 15 veces. 2) Gira las muñecas en ambos sentidos, 10 veces. 3) Estira los dedos hacia atrás con la palma extendida, 20 s por mano. 4) Alterna las tareas de digitación cada 30 minutos.",
+  },
+  {
+    keys: ["turno", "guardia", "noche", "doble turno", "horas extra"],
+    topic: "apoyo",
+    text: "Los turnos prolongados reducen tu tiempo de recuperación. Recomendación: 1) Programa pausas activas de 5 minutos cada 2 horas del turno. 2) Hidrátate y evita cafeína en las últimas 3 horas. 3) Al salir, prioriza 20 minutos de descanso sin pantallas. 4) Registra la acumulación de turnos con tu jefatura: es una de las variables del IRSO y ayuda a prevenir la sobrecarga del servicio.",
+  },
+];
+
+function detectSymptom(t: string): Symptom | null {
+  const hasComplaint =
+    /(me duele|dolor|molestia|tension|tengo|siento|me siento|estoy|no puedo|ando|me cuesta)/.test(t);
+  const match = symptoms.find((s) => s.keys.some((k) => t.includes(k)));
+  if (!match) return null;
+  if (!hasComplaint && !/(cansad|agotad|estres|ansios|triste|insomnio|fatiga)/.test(t)) return null;
+  return match;
+}
+
 const quick = [
   { key: "bienestar", label: "🌿 Actividades de bienestar" },
   { key: "pausas", label: "🧘 Pausas activas" },
@@ -13,7 +75,10 @@ const quick = [
   { key: "ayuda", label: "❓ Ayuda" },
 ];
 
-function classify(t: string): TopicKey {
+function classify(raw: string): TopicKey {
+  const t = norm(raw);
+  const symptom = detectSymptom(t);
+  if (symptom) return symptom.topic;
   if (t.includes("pausa")) return "pausas";
   if (t.includes("institucional") || t.includes("calendario") || t.includes("taller"))
     return "institucional";
@@ -40,8 +105,11 @@ function classify(t: string): TopicKey {
 }
 
 function answer(input: string): Msg {
-  const t = input.toLowerCase();
-  const topic = classify(t);
+  const t = norm(input);
+  const topic = classify(input);
+
+  const symptom = detectSymptom(t);
+  if (symptom) return { role: "bot", text: symptom.text, cards: symptom.topic === "pausas" };
 
   if (topic === "plataforma") {
     if (t.includes("chatbot") || t.includes("asistente") || t.includes("voz"))
@@ -101,7 +169,7 @@ function answer(input: string): Msg {
 
   return {
     role: "bot",
-    text: "Puedo orientarte sobre actividades de bienestar, pausas activas, actividades institucionales, recursos de apoyo y el uso de la plataforma (cómo funciona, para qué sirve, cómo usar el chatbot). Elige una opción rápida o escríbeme tu consulta.",
+    text: "Cuéntame también cómo te sientes (por ejemplo: “me duele el cuello”, “estoy agotada”) y te daré una pausa activa o recurso de apoyo. Puedo orientarte sobre actividades de bienestar, pausas activas, actividades institucionales, recursos de apoyo y el uso de la plataforma (cómo funciona, para qué sirve, cómo usar el chatbot). Elige una opción rápida o escríbeme tu consulta.",
   };
 }
 
@@ -116,7 +184,7 @@ export function Chatbot() {
   const [messages, setMessages] = useState<Msg[]>([
     {
       role: "bot",
-      text: "Hola 👋 Soy Samay Care. Puedes escribirme o hablarme con el micrófono (15 s). Pregúntame por bienestar, pausas activas o cómo funciona la plataforma.",
+      text: "Hola 👋 Soy Samay Care. Puedes escribirme o hablarme con el micrófono (15 s). Cuéntame cómo te sientes (ej.: “me duele el cuello”) y te recomiendo una pausa activa, o pregúntame cómo funciona la plataforma.",
     },
   ]);
   const endRef = useRef<HTMLDivElement>(null);
@@ -133,7 +201,7 @@ export function Chatbot() {
     if (!text.trim()) return;
     const bot = answer(text);
     setMessages((m) => [...m, { role: "user", text }, bot]);
-    recordQuery(classify(text.toLowerCase()), text.trim(), via);
+    recordQuery(classify(text), text.trim(), via);
     setInput("");
   };
 

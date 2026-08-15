@@ -14,14 +14,8 @@ import {
   YAxis,
 } from "recharts";
 import { IrsoGauge } from "@/components/IrsoGauge";
-import {
-  demandData,
-  irsoEvolution,
-  reportTrend,
-  riskByService,
-  riskColor,
-  services,
-} from "@/lib/samay-data";
+import { riskColor } from "@/lib/samay-data";
+import { useLiveData } from "@/lib/live-data";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
@@ -42,12 +36,20 @@ export const Route = createFileRoute("/dashboard")({
   component: DashboardPage,
 });
 
-const kpis = [
+const activeKpis = [
   { label: "IRSO General", value: "68/100", note: "🟡 Riesgo moderado" },
   { label: "Servicios monitoreados", value: "12", note: "Cobertura activa" },
   { label: "Servicios en riesgo alto", value: "3", note: "🔴 Requieren atención" },
   { label: "Alertas preventivas", value: "7", note: "Últimos 7 días" },
   { label: "Tendencia general", value: "↑ 8%", note: "vs. semana anterior" },
+];
+
+const zeroKpis = [
+  { label: "IRSO General", value: "0/100", note: "Simulación no iniciada" },
+  { label: "Servicios monitoreados", value: "0", note: "Sin cobertura activa" },
+  { label: "Servicios en riesgo alto", value: "0", note: "Sin alertas" },
+  { label: "Alertas preventivas", value: "0", note: "Últimos 7 días" },
+  { label: "Tendencia general", value: "0%", note: "vs. semana anterior" },
 ];
 
 const chartCard = "surface-card p-5";
@@ -66,6 +68,15 @@ function ChartTooltip() {
 }
 
 function DashboardPage() {
+  const {
+    active,
+    services,
+    irsoEvolution,
+    demandData,
+    reportTrend,
+    riskByService,
+  } = useLiveData();
+  const kpis = active ? activeKpis : zeroKpis;
   return (
     <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
       <p className="text-xs font-semibold uppercase tracking-widest text-primary">Análisis</p>
@@ -75,6 +86,12 @@ function DashboardPage() {
       <p className="mt-3 max-w-2xl text-sm text-muted-foreground">
         Indicadores preventivos consolidados del entorno hospitalario. Datos demostrativos.
       </p>
+      {!active && (
+        <p className="mt-4 rounded-xl border border-border bg-secondary/50 px-4 py-3 text-sm text-muted-foreground">
+          Todos los índices están en 0. Pulsa “Iniciar simulación” en el menú superior para cargar
+          los datos.
+        </p>
+      )}
 
       <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
         {kpis.map((k) => (
@@ -88,7 +105,7 @@ function DashboardPage() {
 
       <div className="mt-6 grid gap-6 lg:grid-cols-3">
         <div className="surface-card flex flex-col items-center justify-center p-6">
-          <IrsoGauge value={68} level="moderado" size={200} />
+          <IrsoGauge value={active ? 68 : 0} level={active ? "moderado" : "bajo"} size={200} />
           <p className="mt-4 text-center text-xs text-muted-foreground">
             IRSO general del establecimiento
           </p>
@@ -106,7 +123,7 @@ function DashboardPage() {
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
               <XAxis dataKey="fecha" tick={{ fontSize: 11 }} stroke="var(--muted-foreground)" />
-              <YAxis domain={[40, 100]} tick={{ fontSize: 11 }} stroke="var(--muted-foreground)" />
+              <YAxis domain={[0, 100]} tick={{ fontSize: 11 }} stroke="var(--muted-foreground)" />
               {ChartTooltip()}
               <Area
                 type="monotone"

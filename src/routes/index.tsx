@@ -5,10 +5,12 @@ import logo from "@/assets/samay-care-logo.png.asset.json";
 import recolectarIllustration from "@/assets/recolectar-illustration.png.asset.json";
 import analizarIllustration from "@/assets/analizar-illustration.png.asset.json";
 import detectarIllustration from "@/assets/detectar-illustration.png.asset.json";
+import prevenirIllustration from "@/assets/prevenir-illustration.png";
 import { HospitalMap } from "@/components/HospitalMap";
 import { ServiceCards } from "@/components/ServiceCards";
 import { IrsoGauge } from "@/components/IrsoGauge";
-import { irsoVariables, services, type Service } from "@/lib/samay-data";
+import { services } from "@/lib/samay-data";
+import { useLiveData } from "@/lib/live-data";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -57,11 +59,15 @@ const steps = [
     title: "Prevenir",
     icon: ShieldCheck,
     text: "Genera información y recomendaciones que ayudan a los responsables a tomar acciones preventivas.",
+    image: prevenirIllustration,
   },
 ];
 
 function Index() {
-  const [selected, setSelected] = useState<Service>(services[0]!);
+  const [selectedId, setSelectedId] = useState<string>(services[0]!.id);
+  const { services: liveServices, irsoVariables } = useLiveData();
+  const selected = liveServices.find((s) => s.id === selectedId) ?? liveServices[0]!;
+  const setSelected = (s: { id: string }) => setSelectedId(s.id);
 
   return (
     <main>

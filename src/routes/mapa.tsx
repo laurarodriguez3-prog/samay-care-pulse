@@ -3,7 +3,8 @@ import { useState } from "react";
 import { HospitalMap } from "@/components/HospitalMap";
 import { ServiceCards } from "@/components/ServiceCards";
 import { IrsoGauge } from "@/components/IrsoGauge";
-import { irsoVariables, services, type Service } from "@/lib/samay-data";
+import { services } from "@/lib/samay-data";
+import { useLiveData } from "@/lib/live-data";
 
 export const Route = createFileRoute("/mapa")({
   head: () => ({
@@ -25,7 +26,10 @@ export const Route = createFileRoute("/mapa")({
 });
 
 function MapaPage() {
-  const [selected, setSelected] = useState<Service>(services[0]!);
+  const [selectedId, setSelectedId] = useState<string>(services[0]!.id);
+  const { services: liveServices, irsoVariables } = useLiveData();
+  const selected = liveServices.find((s) => s.id === selectedId) ?? liveServices[0]!;
+  const setSelected = (s: { id: string }) => setSelectedId(s.id);
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
