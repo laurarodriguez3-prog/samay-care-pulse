@@ -255,8 +255,9 @@ export function Chatbot() {
           next[next.length - 1] = {
             role: "bot",
             text: res.text?.trim() || fallback.text,
-            cards: fallback.cards,
+            ...(fallback.cards ? { cards: true } : {}),
           };
+
           return next;
         });
       })
