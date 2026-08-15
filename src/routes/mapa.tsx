@@ -25,7 +25,7 @@ export const Route = createFileRoute("/mapa")({
 });
 
 function MapaPage() {
-  const [selected, setSelected] = useState<Service>(services[0]);
+  const [selected, setSelected] = useState<Service>(services[0]!);
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
