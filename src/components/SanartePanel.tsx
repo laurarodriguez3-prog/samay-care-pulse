@@ -181,7 +181,7 @@ export function SanartePanel({
         </div>
       )}
 
-      {workshops.map((w) => (
+      {shown.map((w) => (
         <WorkshopCard key={w.id} w={w} />
       ))}
 
