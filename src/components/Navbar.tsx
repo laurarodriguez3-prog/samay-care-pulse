@@ -44,8 +44,11 @@ export function Navbar() {
         </div>
 
         <div className="flex items-center gap-2">
-          <button className="hidden rounded-full cta-gradient px-5 py-2 text-sm font-semibold shadow-[var(--shadow-card)] transition-opacity hover:opacity-90 md:inline-flex">
-            Ingresar
+          <button
+            onClick={toggleSim}
+            className="hidden rounded-full cta-gradient px-5 py-2 text-sm font-semibold shadow-[var(--shadow-card)] transition-opacity hover:opacity-90 md:inline-flex"
+          >
+            {simLabel}
           </button>
           <button
             aria-label="Abrir menú"
