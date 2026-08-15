@@ -3,6 +3,7 @@ import { useState } from "react";
 import { HospitalMap } from "@/components/HospitalMap";
 import { SanartePanel } from "@/components/SanartePanel";
 import { IrsoGauge } from "@/components/IrsoGauge";
+import { AliadosCarousel } from "@/components/AliadosCarousel";
 import { services } from "@/lib/samay-data";
 import { useLiveData } from "@/lib/live-data";
 
@@ -53,6 +54,8 @@ function MapaPage() {
           </div>
         </div>
       </section>
+
+      <AliadosCarousel />
 
       <section className="mt-16 surface-card p-6 sm:p-10">
         <div className="grid items-center gap-10 lg:grid-cols-[auto_1fr]">
