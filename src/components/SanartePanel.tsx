@@ -7,7 +7,15 @@ function retentionColor(retention: number) {
   return "var(--risk-low)";
 }
 
-function Metric({ label, value, color }: { label: string; value: string; color?: string }) {
+function Metric({
+  label,
+  value,
+  color,
+}: {
+  label: string;
+  value: string;
+  color?: string | undefined;
+}) {
   return (
     <div className="rounded-xl bg-secondary/60 px-2.5 py-2">
       <p className="text-[10px] uppercase tracking-wide text-muted-foreground">{label}</p>

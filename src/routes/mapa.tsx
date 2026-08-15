@@ -46,8 +46,10 @@ function MapaPage() {
         <div className="mt-8 grid gap-6 lg:grid-cols-[65%_1fr]">
           <HospitalMap selected={selected} onSelect={setSelected} />
           <div>
-            <h2 className="mb-3 font-display text-lg font-semibold text-deep">Servicios</h2>
-            <ServiceCards selected={selected} onSelect={setSelected} />
+            <h2 className="mb-3 font-display text-lg font-semibold text-deep">
+              Servicios · bienestar SANARTE
+            </h2>
+            <SanartePanel selected={selected} />
           </div>
         </div>
       </section>
