@@ -549,6 +549,11 @@ export function Chatbot() {
 
 
           <div className="border-t border-border bg-card px-3 pb-3 pt-2">
+            {!userRole && (
+              <p className="mb-2 text-[11px] text-muted-foreground">
+                Selecciona tu cargo para continuar.
+              </p>
+            )}
             {listening && (
               <div className="mb-2 flex items-center gap-2 rounded-xl bg-leaf-soft px-3 py-2 text-[11px] font-medium text-deep">
                 <span className="inline-block h-2 w-2 animate-pulse rounded-full bg-primary" />
@@ -558,7 +563,8 @@ export function Chatbot() {
             {voiceError && (
               <p className="mb-2 text-[11px] text-muted-foreground">{voiceError}</p>
             )}
-            <div className="mb-2 flex flex-wrap gap-1.5">
+            <div className={`mb-2 flex flex-wrap gap-1.5 ${userRole ? "" : "hidden"}`}>
+
               {quick.map((q) => (
                 <button
                   key={q.key}
