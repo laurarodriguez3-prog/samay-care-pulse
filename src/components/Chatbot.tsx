@@ -598,13 +598,16 @@ export function Chatbot() {
               <input
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder="Escribe o habla tu consulta..."
-                className="h-10 flex-1 rounded-full border border-input bg-background px-4 text-sm outline-none focus:ring-2 focus:ring-ring/40"
+                disabled={!userRole}
+                placeholder={userRole ? "Escribe o habla tu consulta..." : "Elige tu cargo arriba"}
+                className="h-10 flex-1 rounded-full border border-input bg-background px-4 text-sm outline-none focus:ring-2 focus:ring-ring/40 disabled:opacity-60"
               />
               <button
                 type="button"
+                disabled={!userRole}
                 onClick={listening ? stopListening : startListening}
                 aria-label={listening ? "Detener grabación" : "Hablar con el asistente"}
+
                 className={`inline-flex h-10 w-10 items-center justify-center rounded-full border border-border transition-colors ${
                   listening ? "bg-leaf-soft" : "hover:bg-sky-soft"
                 }`}
