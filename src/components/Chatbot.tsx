@@ -230,16 +230,19 @@ export function Chatbot() {
   const [listening, setListening] = useState(false);
   const [secondsLeft, setSecondsLeft] = useState(15);
   const [voiceError, setVoiceError] = useState<string | null>(null);
+  const [userRole, setUserRole] = useState<RoleKey | null>(null);
+  const [pausaLeft, setPausaLeft] = useState<number | null>(null);
   const [messages, setMessages] = useState<Msg[]>([
     {
       role: "bot",
-      text: "Hola 👋 Soy Samay Care. Puedes escribirme o hablarme con el micrófono (15 s). Cuéntame cómo te sientes o pregúntame cómo funciona la plataforma",
+      text: "Hola 👋 Soy Samay Care. Antes de empezar, ¿cuál es tu cargo en el instituto?",
     },
   ]);
   const endRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const tickRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const pausaRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const transcriptRef = useRef("");
 
   useEffect(() => {
@@ -248,11 +251,47 @@ export function Chatbot() {
 
   const ask = useServerFn(askAssistant);
 
+  const chooseRole = (key: RoleKey) => {
+    setUserRole(key);
+    setMessages((m) => [
+      ...m,
+      { role: "user", text: roleLabels[key] },
+      {
+        role: "bot",
+        text: `¡Gracias! 😊 Ahora sí: escríbeme o usa el micrófono (15 s). Cuéntame cómo te sientes o pregúntame por la plataforma.`,
+      },
+    ]);
+  };
+
+  const startPausa = () => {
+    if (pausaRef.current) return;
+    setPausaLeft(300);
+    pausaRef.current = setInterval(() => {
+      setPausaLeft((s) => {
+        if (s === null) return s;
+        if (s <= 1) {
+          if (pausaRef.current) clearInterval(pausaRef.current);
+          pausaRef.current = null;
+          setMessages((m) => [...m, { role: "bot", text: REMINDER }]);
+          return null;
+        }
+        return s - 1;
+      });
+    }, 1000);
+  };
+
+  const stopPausa = (finished = false) => {
+    if (pausaRef.current) clearInterval(pausaRef.current);
+    pausaRef.current = null;
+    setPausaLeft(null);
+    if (finished) setMessages((m) => [...m, { role: "bot", text: REMINDER }]);
+  };
+
   const send = (text: string, via: "texto" | "voz" = "texto", local = false) => {
     const value = text.trim();
     if (!value) return;
     const fallback = answer(value);
-    recordQuery(classify(value), value, via);
+    recordQuery(classify(value), value, via, userRole);
     setInput("");
 
     if (local) {
@@ -285,6 +324,7 @@ export function Chatbot() {
             role: "bot",
             text: res.text?.trim() || fallback.text,
             ...(fallback.cards ? { cards: true } : {}),
+            ...(fallback.pausa ? { pausa: true } : {}),
           };
 
           return next;
@@ -298,6 +338,7 @@ export function Chatbot() {
         });
       });
   };
+
 
 
   const clearTimers = () => {
