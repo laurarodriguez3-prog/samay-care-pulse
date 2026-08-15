@@ -1,13 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
-import { riskColor, timeline } from "@/lib/samay-data";
 import {
+  roleIcons,
+  roleLabels,
+  roleOrder,
   startSimulation,
   topicIcons,
   topicLabels,
   useSimulation,
   type TopicKey,
 } from "@/lib/simulation";
+
 
 export const Route = createFileRoute("/linea-de-tiempo")({
   head: () => ({
