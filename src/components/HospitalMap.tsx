@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { HOSPITAL, riskColor, services, type Service } from "@/lib/samay-data";
+import hospitalPhoto from "@/assets/insn-san-borja.png.asset.json";
+
 
 declare global {
   interface Window {
@@ -70,6 +72,22 @@ export function HospitalMap({
           ],
         });
         mapRef.current = map;
+
+        const info = new window.google.maps.InfoWindow({
+          content: `<div style="max-width:280px;font-family:inherit">
+            <img src="${hospitalPhoto.url}" alt="${HOSPITAL.name}" style="width:100%;border-radius:10px;display:block" />
+            <p style="margin:8px 0 2px;font-weight:600;color:#0f3b46">${HOSPITAL.name}</p>
+            <p style="margin:0;font-size:12px;color:#5b6b73">${HOSPITAL.address}</p>
+          </div>`,
+        });
+        const hospitalMarker = new window.google.maps.Marker({
+          position: { lat: HOSPITAL.lat, lng: HOSPITAL.lng },
+          map,
+          title: HOSPITAL.name,
+          zIndex: 999,
+        });
+        hospitalMarker.addListener("click", () => info.open({ map, anchor: hospitalMarker }));
+
         services.forEach((s) => {
           const marker = new window.google.maps.Marker({
             position: s.position,

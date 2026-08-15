@@ -1,9 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { MessageCircle, Mic, Send, Square, X } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
 import { HOSPITAL, wellnessActivities } from "@/lib/samay-data";
+import { askAssistant } from "@/lib/chat.functions";
 import { recordQuery, type TopicKey } from "@/lib/simulation";
 
-type Msg = { role: "bot" | "user"; text: string; cards?: boolean };
+type Msg = { role: "bot" | "user"; text: string; cards?: boolean; pending?: boolean };
+
 
 const norm = (t: string) =>
   t.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -85,7 +88,13 @@ function classify(raw: string): TopicKey {
   if (t.includes("apoyo") || t.includes("recurso") || t.includes("ocupacional")) return "apoyo";
   if (t.includes("bienestar")) return "bienestar";
   if (
+    t.includes("indicador") ||
+    t.includes("indice") ||
+    t.includes("índice") ||
+    t.includes("variable") ||
+    t.includes("metrica") ||
     t.includes("plataforma") ||
+
     t.includes("como funciona") ||
     t.includes("cómo funciona") ||
     t.includes("para que sirve") ||
@@ -112,11 +121,22 @@ function answer(input: string): Msg {
   if (symptom) return { role: "bot", text: symptom.text, cards: symptom.topic === "pausas" };
 
   if (topic === "plataforma") {
+    if (
+      t.includes("indicador") ||
+      t.includes("indice") ||
+      t.includes("variable") ||
+      t.includes("metrica")
+    )
+      return {
+        role: "bot",
+        text: "Los indicadores de Samay Care son: IRSO (Índice de Riesgo de Sobrecarga Organizacional, 0-100: bajo 0-49, moderado 50-69, alto 70-100), Carga de trabajo, Duración de turnos, Demanda de atenciones, Ausentismo, Recuperación (descanso entre jornadas), Incidencias y Distribución de tareas. Además verás la Tendencia (variación % del IRSO) y el Horario crítico de cada servicio. Sirven para anticipar la sobrecarga por servicio y tomar decisiones preventivas; no evalúan a personas.",
+      };
     if (t.includes("chatbot") || t.includes("asistente") || t.includes("voz"))
       return {
         role: "bot",
         text: "Puedes usar el asistente de dos formas: escribiendo tu consulta o pulsando el micrófono para hablar (tienes hasta 15 segundos y luego te doy la recomendación). También puedes tocar los botones rápidos. Cada consulta se registra en la Línea de Tiempo de la simulación.",
       };
+
     if (t.includes("irso"))
       return {
         role: "bot",
@@ -197,13 +217,59 @@ export function Chatbot() {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, open]);
 
-  const send = (text: string, via: "texto" | "voz" = "texto") => {
-    if (!text.trim()) return;
-    const bot = answer(text);
-    setMessages((m) => [...m, { role: "user", text }, bot]);
-    recordQuery(classify(text), text.trim(), via);
+  const ask = useServerFn(askAssistant);
+
+  const send = (text: string, via: "texto" | "voz" = "texto", local = false) => {
+    const value = text.trim();
+    if (!value) return;
+    const fallback = answer(value);
+    recordQuery(classify(value), value, via);
     setInput("");
+
+    if (local) {
+      setMessages((m) => [...m, { role: "user", text: value }, fallback]);
+      return;
+    }
+
+    setMessages((m) => [
+      ...m,
+      { role: "user", text: value },
+      { role: "bot", text: "Escribiendo…", pending: true },
+    ]);
+
+    const history = [
+      ...messages
+        .filter((m) => !m.pending)
+        .slice(-8)
+        .map((m) => ({
+          role: (m.role === "user" ? "user" : "assistant") as "user" | "assistant",
+          content: m.text,
+        })),
+      { role: "user" as const, content: value },
+    ];
+
+    ask({ data: { messages: history } })
+      .then((res) => {
+        setMessages((m) => {
+          const next = [...m];
+          next[next.length - 1] = {
+            role: "bot",
+            text: res.text?.trim() || fallback.text,
+            ...(fallback.cards ? { cards: true } : {}),
+          };
+
+          return next;
+        });
+      })
+      .catch(() => {
+        setMessages((m) => {
+          const next = [...m];
+          next[next.length - 1] = fallback;
+          return next;
+        });
+      });
   };
+
 
   const clearTimers = () => {
     if (timerRef.current) clearTimeout(timerRef.current);
@@ -362,16 +428,23 @@ export function Chatbot() {
               {quick.map((q) => (
                 <button
                   key={q.key}
-                  onClick={() => send(q.label)}
+                  onClick={() => send(q.label, "texto", true)}
                   className="rounded-full border border-border px-2.5 py-1 text-[11px] text-deep transition-colors hover:bg-sky-soft"
                 >
                   {q.label}
                 </button>
               ))}
               <button
-                onClick={() => send("¿Cómo funciona la plataforma?")}
+                onClick={() => send("¿Cuáles son los indicadores y para qué sirven?", "texto", true)}
                 className="rounded-full border border-border px-2.5 py-1 text-[11px] text-deep transition-colors hover:bg-sky-soft"
               >
+                📊 Indicadores
+              </button>
+              <button
+                onClick={() => send("¿Cómo funciona la plataforma?", "texto", true)}
+                className="rounded-full border border-border px-2.5 py-1 text-[11px] text-deep transition-colors hover:bg-sky-soft"
+              >
+
                 🧭 ¿Cómo funciona la plataforma?
               </button>
             </div>
