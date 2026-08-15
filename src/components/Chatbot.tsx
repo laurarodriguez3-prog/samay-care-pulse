@@ -30,7 +30,12 @@ const PAUSA_STEPS = [
 
 const REMINDER =
   "¡Listo! 🎉 Recuerda: todos los miércoles hay pausas activas en el Instituto Nacional de Salud del Niño San Borja.";
-
+const PAUSA_VIDEOS = [
+  { title: "Pausa activa guiada", url: "https://www.youtube.com/watch?v=eYaieUpd--E" },
+  { title: "Estiramientos en el trabajo", url: "https://www.youtube.com/watch?v=Jg6MHTqziPQ" },
+  { title: "Movilidad de cuello y hombros", url: "https://www.youtube.com/watch?v=E6NhedE6SeA" },
+  { title: "Respiración y relajación", url: "https://www.youtube.com/watch?v=kvAPVu7e0aA" },
+];
 
 
 const norm = (t: string) =>
@@ -494,6 +499,23 @@ export function Chatbot() {
                     ▶️ Iniciar pausa activa (5 min)
                   </button>
                 )}
+                {m.pausa && (
+                  <div className="mt-2 space-y-1.5 rounded-xl border border-border bg-background/60 p-2.5">
+                    <p className="text-[11px] font-semibold text-deep">🎬 Videos recomendados</p>
+                    {PAUSA_VIDEOS.map((v) => (
+                      <a
+                        key={v.url}
+                        href={v.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="block rounded-lg bg-sky-soft px-2.5 py-1.5 text-[11px] font-medium text-deep transition-opacity hover:opacity-80"
+                      >
+                        ▶ {v.title}
+                      </a>
+                    ))}
+                  </div>
+                )}
+
               </div>
             ))}
 
