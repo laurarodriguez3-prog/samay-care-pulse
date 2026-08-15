@@ -74,8 +74,14 @@ export function Navbar() {
                 {l.label}
               </Link>
             ))}
-            <button className="mt-2 rounded-full cta-gradient px-5 py-3 text-sm font-semibold">
-              Ingresar
+            <button
+              onClick={() => {
+                toggleSim();
+                setOpen(false);
+              }}
+              className="mt-2 rounded-full cta-gradient px-5 py-3 text-sm font-semibold"
+            >
+              {simLabel}
             </button>
           </div>
         </div>
