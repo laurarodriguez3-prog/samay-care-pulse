@@ -3,9 +3,34 @@ import { MessageCircle, Mic, Send, Square, X } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import { HOSPITAL, wellnessActivities } from "@/lib/samay-data";
 import { askAssistant } from "@/lib/chat.functions";
-import { recordQuery, type TopicKey } from "@/lib/simulation";
+import {
+  recordQuery,
+  roleIcons,
+  roleLabels,
+  roleOrder,
+  type RoleKey,
+  type TopicKey,
+} from "@/lib/simulation";
 
-type Msg = { role: "bot" | "user"; text: string; cards?: boolean; pending?: boolean };
+type Msg = {
+  role: "bot" | "user";
+  text: string;
+  cards?: boolean;
+  pending?: boolean;
+  pausa?: boolean;
+};
+
+const PAUSA_STEPS = [
+  { title: "Respiración 4-4-6", detail: "Inhala 4 s, sostén 4 s, exhala 6 s. Repite con calma." },
+  { title: "Cuello", detail: "Inclina la cabeza a cada hombro 20 s y gira lentamente." },
+  { title: "Hombros y brazos", detail: "Eleva y suelta los hombros 10 veces; estira los brazos." },
+  { title: "Espalda", detail: "De pie, estira hacia el techo y baja soltando el cuello." },
+  { title: "Vista y manos", detail: "Regla 20-20-20 y abre/cierra los puños 15 veces." },
+];
+
+const REMINDER =
+  "¡Listo! 🎉 Recuerda: todos los miércoles hay pausas activas en el Instituto Nacional de Salud del Niño San Borja.";
+
 
 
 const norm = (t: string) =>
