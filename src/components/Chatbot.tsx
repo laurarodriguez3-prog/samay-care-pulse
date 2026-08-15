@@ -112,11 +112,22 @@ function answer(input: string): Msg {
   if (symptom) return { role: "bot", text: symptom.text, cards: symptom.topic === "pausas" };
 
   if (topic === "plataforma") {
+    if (
+      t.includes("indicador") ||
+      t.includes("indice") ||
+      t.includes("variable") ||
+      t.includes("metrica")
+    )
+      return {
+        role: "bot",
+        text: "Los indicadores de Samay Care son: IRSO (Índice de Riesgo de Sobrecarga Organizacional, 0-100: bajo 0-49, moderado 50-69, alto 70-100), Carga de trabajo, Duración de turnos, Demanda de atenciones, Ausentismo, Recuperación (descanso entre jornadas), Incidencias y Distribución de tareas. Además verás la Tendencia (variación % del IRSO) y el Horario crítico de cada servicio. Sirven para anticipar la sobrecarga por servicio y tomar decisiones preventivas; no evalúan a personas.",
+      };
     if (t.includes("chatbot") || t.includes("asistente") || t.includes("voz"))
       return {
         role: "bot",
         text: "Puedes usar el asistente de dos formas: escribiendo tu consulta o pulsando el micrófono para hablar (tienes hasta 15 segundos y luego te doy la recomendación). También puedes tocar los botones rápidos. Cada consulta se registra en la Línea de Tiempo de la simulación.",
       };
+
     if (t.includes("irso"))
       return {
         role: "bot",
