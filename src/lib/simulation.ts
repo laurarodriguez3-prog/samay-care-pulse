@@ -127,7 +127,12 @@ function hydrate() {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw) as SimState;
-      state = { ...initialState(), ...parsed, counts: { ...emptyCounts(), ...parsed.counts } };
+      state = {
+        ...initialState(),
+        ...parsed,
+        counts: { ...emptyCounts(), ...parsed.counts },
+        roleCounts: { ...emptyRoleCounts(), ...parsed.roleCounts },
+      };
     }
   } catch {
     /* ignore */
@@ -156,11 +161,19 @@ export function stopSimulation() {
   emit();
 }
 
-export function recordQuery(topic: TopicKey, query: string, via: "texto" | "voz") {
+export function recordQuery(
+  topic: TopicKey,
+  query: string,
+  via: "texto" | "voz",
+  role?: RoleKey | null,
+) {
   state = {
     ...state,
     chatbotUses: state.chatbotUses + 1,
     counts: { ...state.counts, [topic]: state.counts[topic] + 1 },
+    roleCounts: role
+      ? { ...state.roleCounts, [role]: (state.roleCounts[role] ?? 0) + 1 }
+      : state.roleCounts,
     events: [
       {
         id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
@@ -168,12 +181,14 @@ export function recordQuery(topic: TopicKey, query: string, via: "texto" | "voz"
         topic,
         query,
         via,
+        role: role ?? null,
       },
       ...state.events,
     ].slice(0, 60),
   };
   emit();
 }
+
 
 export function useSimulation(): SimState {
   return useSyncExternalStore(
