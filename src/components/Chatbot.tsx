@@ -479,10 +479,74 @@ export function Chatbot() {
                     </p>
                   </div>
                 )}
+                {m.pausa && pausaLeft === null && (
+                  <button
+                    onClick={startPausa}
+                    className="mt-2 rounded-full cta-gradient px-4 py-2 text-xs font-semibold"
+                  >
+                    ▶️ Iniciar pausa activa (5 min)
+                  </button>
+                )}
               </div>
             ))}
+
+            {!userRole && (
+              <div className="flex flex-wrap gap-1.5">
+                {roleOrder.map((k) => (
+                  <button
+                    key={k}
+                    onClick={() => chooseRole(k)}
+                    className="rounded-full border border-border px-2.5 py-1 text-[11px] text-deep transition-colors hover:bg-sky-soft"
+                  >
+                    {roleIcons[k]} {roleLabels[k]}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {pausaLeft !== null && (
+              <div className="surface-card space-y-2 p-3">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-semibold text-deep">🧘 Pausa activa guiada</p>
+                  <span className="font-display text-lg font-semibold text-deep">
+                    {String(Math.floor(pausaLeft / 60)).padStart(2, "0")}:
+                    {String(pausaLeft % 60).padStart(2, "0")}
+                  </span>
+                </div>
+                {(() => {
+                  const idx = Math.min(
+                    PAUSA_STEPS.length - 1,
+                    Math.floor((300 - pausaLeft) / 60),
+                  );
+                  const step = PAUSA_STEPS[idx]!;
+                  return (
+                    <div className="rounded-xl bg-leaf-soft px-3 py-2">
+                      <p className="text-xs font-semibold text-deep">
+                        Paso {idx + 1}/5 · {step.title}
+                      </p>
+                      <p className="text-xs text-muted-foreground">{step.detail}</p>
+                    </div>
+                  );
+                })()}
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => stopPausa(true)}
+                    className="rounded-full bg-sky-soft px-3 py-1 text-[11px] font-medium text-deep"
+                  >
+                    Terminar ahora
+                  </button>
+                  <button
+                    onClick={() => stopPausa(false)}
+                    className="rounded-full border border-border px-3 py-1 text-[11px] text-deep"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            )}
             <div ref={endRef} />
           </div>
+
 
           <div className="border-t border-border bg-card px-3 pb-3 pt-2">
             {listening && (
