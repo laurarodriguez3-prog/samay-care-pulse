@@ -134,8 +134,11 @@ function Index() {
         </div>
 
         <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {steps.map((s) => (
-            <article key={s.n} className="surface-card p-6">
+          {steps.map((s, i) => (
+            <article
+              key={s.n}
+              className={`surface-card p-6 ${s.image ? "sm:col-span-2 lg:col-span-2" : ""} ${i === 0 ? "lg:row-span-1" : ""}`}
+            >
               <div className="flex items-center justify-between">
                 <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-leaf-soft text-primary">
                   <s.icon className="h-5 w-5" />
@@ -143,11 +146,13 @@ function Index() {
                 <span className="font-display text-2xl font-semibold text-sky">{s.n}</span>
               </div>
               {s.image && (
-                <img
-                  src={s.image}
-                  alt={`Ilustración del paso ${s.title}`}
-                  className="mt-4 h-40 w-full rounded-xl object-contain"
-                />
+                <div className="mt-4 flex h-64 w-full items-center justify-center overflow-hidden rounded-xl bg-secondary/50">
+                  <img
+                    src={s.image}
+                    alt={`Ilustración del paso ${s.title}`}
+                    className="h-full w-full object-contain p-2"
+                  />
+                </div>
               )}
               <h3 className="mt-4 font-display text-lg font-semibold text-deep">{s.title}</h3>
               <p className="mt-2 text-sm text-muted-foreground">{s.text}</p>
