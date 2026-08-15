@@ -204,7 +204,7 @@ export function Chatbot() {
   const [messages, setMessages] = useState<Msg[]>([
     {
       role: "bot",
-      text: "Hola 👋 Soy Samay Care. Puedes escribirme o hablarme con el micrófono (15 s). Cuéntame cómo te sientes (ej.: “me duele el cuello”) y te recomiendo una pausa activa, o pregúntame cómo funciona la plataforma.",
+      text: "Hola 👋 Soy Samay Care. Puedes escribirme o hablarme con el micrófono (15 s). Cuéntame cómo te sientes o pregúntame cómo funciona la plataforma",
     },
   ]);
   const endRef = useRef<HTMLDivElement>(null);
