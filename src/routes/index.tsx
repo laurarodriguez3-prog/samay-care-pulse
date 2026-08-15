@@ -42,6 +42,7 @@ const steps = [
     title: "Analizar",
     icon: BarChart3,
     text: "La plataforma analiza tendencias y genera indicadores de riesgo para cada servicio.",
+    image: analizarIllustration.url,
   },
   {
     n: "03",
